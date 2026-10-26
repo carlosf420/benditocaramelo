@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bendito Caramelo - Sistema de Gestão ERP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            caramel: {
+              50: '#fffaf0',
+              100: '#fef3c7',
+              300: '#fcd34d',
+              500: '#d97706',
+              600: '#b45309',
+              700: '#92400e',
+              800: '#78350f',
+              900: '#451a03',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(180, 83, 9, 0.3);
+      border-radius: 9999px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(251, 191, 36, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-amber-50/40 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- APP CONTAINER -->
+  <div id="app" class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-amber-200/60 dark:border-slate-800 flex flex-col justify-between shrink-0 transition-all z-20">
+      <div>
+        <!-- BRAND HEADER -->
+        <div class="p-5 border-b border-amber-100 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-caramel-600 to-amber-400 flex items-center justify-center text-white shadow-md shadow-caramel-600/20 font-bold text-xl">
+              🍬
+            </div>
+            <div>
+              <h1 class="font-bold text-lg text-caramel-900 dark:text-amber-400 leading-tight">Bendito Caramelo</h1>
+              <p class="text-xs text-amber-700/80 dark:text-slate-400 font-medium">Gestão & Confeitaria</p>
+            </div>
+          </div>
+          <button onclick="toggleDarkMode()" class="p-2 text-slate-500 hover:text-caramel-600 dark:text-slate-400 dark:hover:text-amber-400 rounded-lg transition-colors">
+            <i id="themeIcon" class="fas fa-moon text-lg"></i>
+          </button>
+        </div>
+
+        <!-- USER PROFILE BADGE -->
+        <div class="p-3 mx-3 my-3 bg-amber-50/80 dark:bg-slate-800/60 rounded-xl border border-amber-200/50 dark:border-slate-700/50 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-caramel-600 text-white flex items-center justify-center font-semibold text-xs" id="userAvatar">
+            AM
+          </div>
+          <div class="flex-1 overflow-hidden">
+            <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" id="userName">Proprietária</p>
+            <p class="text-[10px] text-caramel-700 dark:text-amber-400 font-semibold" id="userRole">ADMIN MASTER</p>
+          </div>
+          <button onclick="switchRole()" title="Trocar Perfil" class="text-xs text-slate-400 hover:text-caramel-600">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav class="px-3 space-y-1 my-2 font-medium text-sm">
+          <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-chart-line w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Dashboard</span>
+          </button>
+
+          <button onclick="navigate('produtos')" id="nav-produtos" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-cookie-bite w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>PRODUTOS</span>
+          </button>
+
+          <button onclick="navigate('ai-prices')" id="nav-ai-prices" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all relative">
+            <i class="fas fa-robot w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>IA de Preços RJ</span>
+            <span class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full">IA</span>
+          </button>
+
+          <button onclick="navigate('pedidos')" id="nav-pedidos" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-shopping-bag w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Pedidos / Vendas</span>
+          </button>
+
+          <button onclick="navigate('clientes')" id="nav-clientes" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-address-book w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Clientes CRM</span>
+          </button>
+
+          <button onclick="navigate('fichas')" id="nav-fichas" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-receipt w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Fichas Técnicas</span>
+          </button>
+
+          <button onclick="navigate('estoque')" id="nav-estoque" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-boxes w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Insumos & Estoque</span>
+          </button>
+
+          <button onclick="navigate('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-amber-100/60 dark:hover:bg-slate-800 transition-all">
+            <i class="fas fa-wallet w-5 text-caramel-600 dark:text-amber-400"></i>
+            <span>Financeiro & Caixa</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- BOTTOM CONTROL -->
+      <div class="p-4 border-t border-amber-100 dark:border-slate-800 space-y-2">
+        <button onclick="resetDataPrompt()" class="w-full text-xs py-2 px-3 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center gap-2 border border-rose-200/60 dark:border-rose-900/50 transition-all">
+          <i class="fas fa-trash-alt"></i> Zerar Dados
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar">
+
+      <!-- TOP HEADER BAR -->
+      <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-amber-200/60 dark:border-slate-800 p-4 sticky top-0 z-10 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <h2 id="pageTitle" class="text-xl font-bold text-slate-800 dark:text-amber-400">Dashboard</h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- SEARCH BAR -->
+          <div class="relative hidden sm:block">
+            <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="globalSearchInput" placeholder="Buscar produto, cliente ou kit..." onkeyup="filterProductsBySearch(this.value)" class="pl-9 pr-4 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-caramel-500 w-60">
+          </div>
+
+          <button onclick="openModal('modal-novo-produto')" class="bg-gradient-to-r from-caramel-600 to-amber-600 hover:from-caramel-700 hover:to-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md shadow-amber-600/20 flex items-center gap-2 transition-all">
+            <i class="fas fa-plus"></i>
+            <span>+ Cadastrar Doce</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW PAGES -->
+      <div class="p-4 md:p-6 space-y-6 flex-1">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Vendas do Mês</p>
+              <h3 class="text-2xl font-bold text-slate-800 dark:text-white mt-1" id="dashVendasMes">R$ 0,00</h3>
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-2"><i class="fas fa-check-circle"></i> Vendas Confirmadas</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Pedidos Ativos</p>
+              <h3 class="text-2xl font-bold text-slate-800 dark:text-white mt-1" id="dashPedidosAtivos">0</h3>
+              <p class="text-xs text-amber-600 dark:text-amber-400 font-medium mt-2"><i class="fas fa-clock"></i> Em Produção / Pendentes</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm">
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Insumos em Alerta</p>
+              <h3 class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1" id="dashEstoqueBaixo">0</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-2"><i class="fas fa-exclamation-triangle"></i> Reposição de Leite Moça/Açúcar</p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm bg-gradient-to-br from-amber-500/10 to-transparent">
+              <p class="text-xs font-semibold text-amber-800 dark:text-amber-300">Economia IA (RJ)</p>
+              <h3 class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1" id="dashEconomiaIA">R$ 48,20</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-2"><i class="fas fa-robot"></i> Inteligência de Compras</p>
+            </div>
+          </div>
+
+          <!-- IA QUICK INSIGHT BANNER -->
+          <div class="bg-gradient-to-r from-amber-600 to-caramel-700 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl shrink-0">
+                🍬
+              </div>
+              <div>
+                <h4 class="font-bold text-lg">Tabela Oficial Bendito Caramelo</h4>
+                <p class="text-xs text-amber-100 mt-0.5">Sua vitrine de balas, sacos, caixas presenteáveis, potinhos e kits está totalmente cadastrada com os preços oficiais.</p>
+              </div>
+            </div>
+            <button onclick="navigate('produtos')" class="bg-white text-caramel-900 px-4 py-2 rounded-xl text-xs font-bold hover:bg-amber-50 transition-all shrink-0">
+              Ver Tabela de Produtos <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+
+          <!-- CHARTS GRID -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm">
+              <h4 class="font-bold text-slate-800 dark:text-slate-200 mb-4 text-sm">Faturamento por Mês</h4>
+              <div class="h-64">
+                <canvas id="chartFaturamento"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm">
+              <h4 class="font-bold text-slate-800 dark:text-slate-200 mb-4 text-sm">Pesquisa Leite Moça (RJ)</h4>
+              <div class="h-64">
+                <canvas id="chartPrecosInsumos"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRODUTOS VIEW -->
+        <section id="view-produtos" class="space-y-6 hidden">
+          <div class="bg-amber-900/90 text-white p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300">Tabela de Preços Bendito Caramelo</span>
+              <h3 class="text-2xl font-bold mt-1">Produtos, Caixas & Kits Presenteáveis 🍬</h3>
+              <p class="text-xs text-amber-100 mt-1">Confira a lista oficial de balas, sacos, caixas de metal, potinhos e bolsas.</p>
+            </div>
+            <button onclick="openModal('modal-novo-produto')" class="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all shrink-0">
+              + Cadastrar Novo Item
+            </button>
+          </div>
+
+          <!-- CATEGORY FILTERS FOR PRODUCTS -->
+          <div class="flex flex-wrap gap-2 border-b border-amber-200/60 dark:border-slate-800 pb-3">
+            <button onclick="filterCategory('ALL')" id="cat-ALL" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-caramel-600 text-white">Todos</button>
+            <button onclick="filterCategory('AVULSOS')" id="cat-AVULSOS" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300">Balas Avulsas & Cento</button>
+            <button onclick="filterCategory('SACOS')" id="cat-SACOS" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300">Sacos de Balas</button>
+            <button onclick="filterCategory('CAIXAS')" id="cat-CAIXAS" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300">Caixas & Latas de Metal</button>
+            <button onclick="filterCategory('POTINHO')" id="cat-POTINHO" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300">Potinhos Gourmet</button>
+            <button onclick="filterCategory('KITS')" id="cat-KITS" class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300">Bolsas & Kits Sugeridos</button>
+          </div>
+
+          <div id="produtosGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamic Products -->
+          </div>
+        </section>
+
+        <!-- IA PRICES MODULE VIEW -->
+        <section id="view-ai-prices" class="space-y-6 hidden">
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-full">Rio de Janeiro - RJ</span>
+                  <span class="text-xs text-slate-400">Verificado em 27/09/2026</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-amber-400 mt-2">IA de Inteligência & Comparação de Preços</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pesquisa em tempo real de atacadistas e supermercados cariocas (Guanabara, Assaí, Zona Sul, Mundial e Carrefour).</p>
+              </div>
+              <button onclick="refreshAIPrices()" class="bg-caramel-600 hover:bg-caramel-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-2 shrink-0">
+                <i class="fas fa-sync-alt" id="refreshIcon"></i> Atualizar Preços RJ
+              </button>
+            </div>
+
+            <!-- PRODUCT TABS -->
+            <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800">
+              <button onclick="switchAITab('moca')" id="ai-tab-moca" class="px-4 py-2 text-xs font-bold border-b-2 border-caramel-600 text-caramel-700 dark:text-amber-400">Leite Moça (Nestlé 395g)</button>
+              <button onclick="switchAITab('uniao')" id="ai-tab-uniao" class="px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400">Açúcar União (1kg)</button>
+            </div>
+
+            <!-- AI COMPARISON TABLE -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-amber-50/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-b border-amber-200/50 dark:border-slate-700">
+                    <th class="p-3 font-semibold">Classificação</th>
+                    <th class="p-3 font-semibold">Loja / Supermercado</th>
+                    <th class="p-3 font-semibold">Preço Unitário</th>
+                    <th class="p-3 font-semibold">Preço por kg/L</th>
+                    <th class="p-3 font-semibold">Status</th>
+                    <th class="p-3 font-semibold">Link da Oferta</th>
+                  </tr>
+                </thead>
+                <tbody id="aiPricesTable" class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- PEDIDOS / VENDAS VIEW -->
+        <section id="view-pedidos" class="space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Gestão de Pedidos</h3>
+            <button onclick="openModal('modal-novo-pedido')" class="bg-caramel-600 text-white text-xs font-bold px-4 py-2 rounded-xl">
+              + Novo Pedido
+            </button>
+          </div>
+
+          <!-- KANBAN BOARD -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-3 flex items-center justify-between">
+                <span>Pendente / Aguardando</span>
+                <span class="bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full text-[10px]" id="countPendente">0</span>
+              </h4>
+              <div id="colPendente" class="space-y-3 min-h-[200px]"></div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-3 flex items-center justify-between">
+                <span>Em Produção</span>
+                <span class="bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full text-[10px]" id="countProducao">0</span>
+              </h4>
+              <div id="colProducao" class="space-y-3 min-h-[200px]"></div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <h4 class="font-bold text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3 flex items-center justify-between">
+                <span>Pronto / Entregue</span>
+                <span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full text-[10px]" id="countEntregue">0</span>
+              </h4>
+              <div id="colEntregue" class="space-y-3 min-h-[200px]"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CLIENTES CRM VIEW -->
+        <section id="view-clientes" class="space-y-6 hidden">
+          <div class="flex items-center justify-between gap-4">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Clientes CRM</h3>
+            <button onclick="openModal('modal-novo-cliente')" class="bg-caramel-600 text-white text-xs font-bold px-4 py-2 rounded-xl">
+              + Cadastrar Cliente
+            </button>
+          </div>
+
+          <div id="clientesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dynamic Client Cards -->
+          </div>
+        </section>
+
+        <!-- FICHAS TECNICAS VIEW -->
+        <section id="view-fichas" class="space-y-6 hidden">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Fichas Técnicas & Receitas</h3>
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-amber-200/60 dark:border-slate-800 space-y-4">
+            <h4 class="font-bold text-base text-slate-800 dark:text-amber-400">Bala Caramelada de Doce de Leite</h4>
+            <p class="text-xs text-slate-500">Rendimento: 100 unidades de balas carameladas artesanais</p>
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <th class="p-2">Insumo</th>
+                  <th class="p-2">Qtd Necessária</th>
+                  <th class="p-2">Preço de Compra (RJ)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr><td class="p-2 font-semibold">Leite Moça 395g</td><td class="p-2">2 caixinhas</td><td class="p-2">R$ 6,97 (Atacadão)</td></tr>
+                <tr><td class="p-2 font-semibold">Açúcar União 1kg</td><td class="p-2">0,5 kg</td><td class="p-2">R$ 3,79 (Carrefour)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- INSUMOS VIEW -->
+        <section id="view-estoque" class="space-y-6 hidden">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Insumos & Controle de Estoque</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-amber-200/60 dark:border-slate-800 overflow-hidden">
+            <table class="w-full text-xs text-left">
+              <thead>
+                <tr class="bg-amber-50/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-amber-200/50 dark:border-slate-700">
+                  <th class="p-3">Insumo / Marca</th>
+                  <th class="p-3">Estoque Atual</th>
+                  <th class="p-3">Estoque Mínimo</th>
+                  <th class="p-3">Última Cotação RJ</th>
+                  <th class="p-3">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="estoqueTable" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- FINANCEIRO VIEW -->
+        <section id="view-financeiro" class="space-y-6 hidden">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Financeiro & Caixa</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <p class="text-xs text-slate-500">Saldo Atual do Caixa</p>
+              <h4 class="text-2xl font-bold text-slate-800 dark:text-white mt-1" id="finSaldo">R$ 0,00</h4>
+            </div>
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <p class="text-xs text-slate-500">Entradas / Receitas</p>
+              <h4 class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1" id="finEntradas">R$ 0,00</h4>
+            </div>
+            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800">
+              <p class="text-xs text-slate-500">Saídas / Despesas</p>
+              <h4 class="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1" id="finSaidas">R$ 0,00</h4>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR / EDITAR PRODUTO -->
+  <div id="modal-novo-produto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-amber-200/60 dark:border-slate-800 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 id="modalProdutoTitle" class="font-bold text-slate-800 dark:text-amber-400 text-base">Cadastrar Novo Doce / Kit</h3>
+        <button onclick="closeModal('modal-novo-produto')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+      </div>
+
+      <input type="hidden" id="editProdutoId" value="">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Categoria do Item *</label>
+          <select id="prodCategoryGroup" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold">
+            <option value="AVULSOS">Balas Avulsas & Cento</option>
+            <option value="SACOS">Sacos de Balas</option>
+            <option value="CAIXAS">Caixas & Latas de Metal</option>
+            <option value="POTINHO">Potinhos Gourmet</option>
+            <option value="KITS">Bolsas & Kits Presenteáveis</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Nome do Produto / Kit *</label>
+          <input type="text" id="prodNome" placeholder="Ex: Saco 12 Balas (Amêndoas / Damasco)" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Formato / Embalagem / Descrição *</label>
+          <input type="text" id="prodRendimento" placeholder="Ex: 12 Balas Especial ou 1 Conj. Panos + 2 Sacos 10 Balas" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Valor de Venda (R$) *</label>
+          <input type="number" id="prodPreco" step="0.01" placeholder="110.40" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-novo-produto')" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">Cancelar</button>
+        <button onclick="saveProduto()" class="px-4 py-2 rounded-xl bg-caramel-600 text-white text-xs font-bold">Salvar Produto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CLIENTE -->
+  <div id="modal-novo-cliente" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-amber-200/60 dark:border-slate-800 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 id="modalClienteTitle" class="font-bold text-slate-800 dark:text-amber-400 text-base">Cadastrar Cliente</h3>
+        <button onclick="closeModal('modal-novo-cliente')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+      </div>
+
+      <input type="hidden" id="editClienteId" value="">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Nome Completo *</label>
+          <input type="text" id="cliNome" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">WhatsApp *</label>
+          <input type="text" id="cliWhats" placeholder="(21) 99999-8888" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Instagram</label>
+          <input type="text" id="cliInsta" placeholder="@cliente" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Bairro / Endereço (RJ)</label>
+          <input type="text" id="cliEnd" placeholder="Copacabana, Rio de Janeiro" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Observações</label>
+          <textarea id="cliObs" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-novo-cliente')" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">Cancelar</button>
+        <button onclick="saveCliente()" class="px-4 py-2 rounded-xl bg-caramel-600 text-white text-xs font-bold">Salvar Cliente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO PEDIDO -->
+  <div id="modal-novo-pedido" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-amber-200/60 dark:border-slate-800 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-800 dark:text-amber-400 text-base">Criar Novo Pedido</h3>
+        <button onclick="closeModal('modal-novo-pedido')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Cliente *</label>
+          <select id="pedCliente" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <!-- Populated -->
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Produto / Kit *</label>
+          <select id="pedProduto" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+            <!-- Populated -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Quantidade</label>
+            <input type="number" id="pedQtd" value="1" min="1" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Valor Total (R$)</label>
+            <input type="number" id="pedValor" placeholder="180.00" step="0.01" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Data de Entrega</label>
+          <input type="date" id="pedData" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-novo-pedido')" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">Cancelar</button>
+        <button onclick="savePedido()" class="px-4 py-2 rounded-xl bg-caramel-600 text-white text-xs font-bold">Criar Pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC & DATA PERSISTENCE -->
+  <script>
+    // INITIAL AI PRICES FOR RIO DE JANEIRO
+    const INITIAL_AI_PRICES = {
+      moca: [
+        { rank: '🥇 Melhor Preço', store: 'Atacadão (RJ)', price: 6.97, priceKg: 17.64, status: 'Preço Verificado', link: 'https://www.atacadao.com.br/leite-condensado-moca-integral-18842-30600/p' },
+        { rank: '🥈 2º Lugar', store: 'Supermercados Guanabara', price: 8.68, priceKg: 21.97, status: 'Preço Verificado', link: 'https://www.supermercadosguanabara.com.br/produtos/92' },
+        { rank: '🥉 3º Lugar', store: 'Supermercado Zona Sul', price: 8.98, priceKg: 22.73, status: 'Preço Verificado', link: 'https://www.zonasul.com.br/mercearia-e-gastronomia/doces-e-sobremesas/leites-condensados' }
+      ],
+      uniao: [
+        { rank: '🥇 Melhor Preço', store: 'Mercado Carrefour (RJ)', price: 3.79, priceKg: 3.79, status: 'Preço Verificado', link: 'https://mercado.carrefour.com.br/marca/uni%C3%A3o-mundial' },
+        { rank: '🥈 2º Lugar', store: 'Mercado Livre / Kit 4 un', price: 8.10, priceKg: 8.10, status: 'Preço Verificado', link: 'https://www.mercadolivre.com.br/acucar-refinado-uniao-classico-1kg-kit-4-unidades/p/MLB2076085665' }
+      ]
+    };
+
+    // COMPLETE BENDITO CARAMELO OFFICIAL PRICE CATALOG
+    const OFFICIAL_BENDITO_PRODUCTS = [
+      // BALAS AVULSAS E CENTO
+      { id: '1', group: 'AVULSOS', name: 'Bala Caramelada Tradicional (Unidade)', yield: 'Unidade Avulsa', price: 8.20 },
+      { id: '2', group: 'AVULSOS', name: 'Bala Caramelada Amêndoas / Damasco (Unidade)', yield: 'Unidade Avulsa', price: 9.20 },
+      { id: '3', group: 'AVULSOS', name: 'Caramelo (Unidade)', yield: 'Unidade Avulsa', price: 4.50 },
+      { id: '4', group: 'AVULSOS', name: 'Bala de Ovo (Cento)', yield: 'Unidade no Cento', price: 7.90 },
+      { id: '5', group: 'AVULSOS', name: 'Bala de Chocolate Belga / Doce de Leite (Cento)', yield: 'Unidade no Cento', price: 7.90 },
+      { id: '6', group: 'AVULSOS', name: 'Bala de Amêndoas / Amendoim / Damasco (Cento)', yield: 'Unidade no Cento', price: 8.90 },
+
+      // SACOS
+      { id: '7', group: 'SACOS', name: 'Saco 10 Balas Tradicionais', yield: '10 Balas', price: 82.00 },
+      { id: '8', group: 'SACOS', name: 'Saco 10 Balas (Amêndoas / Damasco)', yield: '10 Balas', price: 92.00 },
+      { id: '9', group: 'SACOS', name: 'Saco 12 Balas Tradicionais', yield: '12 Balas', price: 98.40 },
+      { id: '10', group: 'SACOS', name: 'Saco 12 Balas (Amêndoas / Damasco)', yield: '12 Balas', price: 110.40 },
+      { id: '11', group: 'SACOS', name: 'Saco 15 Balas Tradicionais', yield: '15 Balas', price: 123.00 },
+      { id: '12', group: 'SACOS', name: 'Saco 15 Balas (Amêndoas / Damasco)', yield: '15 Balas', price: 138.00 },
+      { id: '13', group: 'SACOS', name: 'Saco 20 Balas Tradicionais', yield: '20 Balas', price: 164.00 },
+      { id: '14', group: 'SACOS', name: 'Saco 20 Balas (Amêndoas / Damasco)', yield: '20 Balas', price: 184.00 },
+      { id: '15', group: 'SACOS', name: 'Saco 25 Balas Tradicionais', yield: '25 Balas', price: 205.00 },
+      { id: '16', group: 'SACOS', name: 'Saco 25 Balas (Amêndoas / Damasco)', yield: '25 Balas', price: 230.00 },
+      { id: '17', group: 'SACOS', name: 'Saco 30 Balas Tradicionais', yield: '30 Balas', price: 246.00 },
+      { id: '18', group: 'SACOS', name: 'Saco 30 Balas (Amêndoas / Damasco)', yield: '30 Balas', price: 276.00 },
+
+      // CAIXAS & LATAS
+      { id: '19', group: 'CAIXAS', name: 'Caixa Grande - 20 Balas Tradicionais', yield: 'Caixa Elegante', price: 206.00 },
+      { id: '20', group: 'CAIXAS', name: 'Caixa Grande - 20 Balas (Amêndoas / Damasco)', yield: 'Caixa Elegante', price: 226.00 },
+      { id: '21', group: 'CAIXAS', name: 'Caixa Grande - 30 Balas Tradicionais', yield: 'Caixa Elegante', price: 288.00 },
+      { id: '22', group: 'CAIXAS', name: 'Caixa Grande - 30 Balas (Amêndoas / Damasco)', yield: 'Caixa Elegante', price: 318.00 },
+      { id: '23', group: 'CAIXAS', name: 'Caixa Média - 10 Balas Tradicionais', yield: 'Caixa Elegante', price: 120.00 },
+      { id: '24', group: 'CAIXAS', name: 'Caixa Média - 10 Balas (Amêndoas / Damasco)', yield: 'Caixa Elegante', price: 130.00 },
+      { id: '25', group: 'CAIXAS', name: 'Caixa Média - 15 Balas Tradicionais', yield: 'Caixa Elegante', price: 161.00 },
+      { id: '26', group: 'CAIXAS', name: 'Caixa Média - 15 Balas (Amêndoas / Damasco)', yield: 'Caixa Elegante', price: 176.00 },
+      { id: '27', group: 'CAIXAS', name: 'Caixa Metal Pequena (10 Caramelos)', yield: 'Lata de Metal Peq.', price: 58.00 },
+      { id: '28', group: 'CAIXAS', name: 'Caixa Metal Grande (20 Caramelos)', yield: 'Lata de Metal Gde.', price: 108.00 },
+
+      // POTINHOS
+      { id: '29', group: 'POTINHO', name: 'Potinho Gourmet 100g (Creme de Ovos ou Choco Belga)', yield: 'Potinho 100g', price: 62.00 },
+      { id: '30', group: 'POTINHO', name: 'Potinho Gourmet 200g (Creme de Ovos ou Choco Belga)', yield: 'Potinho 200g', price: 108.00 },
+
+      // BOLSAS & KITS
+      { id: '31', group: 'KITS', name: 'Conjunto de Panos de Prato (2 panos)', yield: 'Acessório / Casa', price: 58.00 },
+      { id: '32', group: 'KITS', name: 'Bolsa Pequena (Bolsos ou Listrada) - Avulsa', yield: 'Embalagem Especial', price: 208.00 },
+      { id: '33', group: 'KITS', name: 'Kit Sugerido 1 (1 Conj. Panos + 2 Sacos 10 Balas)', yield: 'Bolsa + Panos + 20 Balas', price: 435.00 },
+      { id: '34', group: 'KITS', name: 'Kit Sugerido 1 Especial (1 Conj. Panos + 2 Sacos 10 Balas Esp.)', yield: 'Bolsa + Panos + 20 Balas Esp.', price: 455.00 },
+      { id: '35', group: 'KITS', name: 'Kit Sugerido 2 (1 Conj. Panos + 1 Saco 10 Balas + 1 Pote 100g)', yield: 'Bolsa + Panos + Balas + Pote', price: 410.00 },
+      { id: '36', group: 'KITS', name: 'Cestinha Páscoa Tradicional (10 Balas)', yield: 'Edição Especial', price: 203.00 },
+      { id: '37', group: 'KITS', name: 'Cestinha Páscoa Especial (10 Balas Especial)', yield: 'Edição Especial', price: 238.00 }
+    ];
+
+    const DEFAULT_STOCK = [
+      { name: 'Leite Moça 395g (Nestlé)', qty: 8, min: 20, lastPrice: 'R$ 6,97 (Atacadão RJ)' },
+      { name: 'Açúcar União 1kg', qty: 5, min: 15, lastPrice: 'R$ 3,79 (Carrefour RJ)' }
+    ];
+
+    // APP STATE
+    let db = {
+      clientes: JSON.parse(localStorage.getItem('bc_clientes')) || [],
+      pedidos: JSON.parse(localStorage.getItem('bc_pedidos')) || [],
+      produtos: JSON.parse(localStorage.getItem('bc_produtos')) || OFFICIAL_BENDITO_PRODUCTS,
+      estoque: JSON.parse(localStorage.getItem('bc_estoque')) || DEFAULT_STOCK,
+      aiPrices: JSON.parse(localStorage.getItem('bc_ai_prices')) || INITIAL_AI_PRICES
+    };
+
+    let currentRole = 'ADMIN MASTER';
+    let currentAiTab = 'moca';
+    let currentCategoryFilter = 'ALL';
+
+    function saveDB() {
+      localStorage.setItem('bc_clientes', JSON.stringify(db.clientes));
+      localStorage.setItem('bc_pedidos', JSON.stringify(db.pedidos));
+      localStorage.setItem('bc_produtos', JSON.stringify(db.produtos));
+      localStorage.setItem('bc_estoque', JSON.stringify(db.estoque));
+      localStorage.setItem('bc_ai_prices', JSON.stringify(db.aiPrices));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+      renderDashboard();
+      renderAIPrices();
+      renderPedidos();
+      renderClientes();
+      renderProdutos();
+      renderEstoque();
+      populateDropdowns();
+
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fas fa-sun text-lg';
+      }
+    });
+
+    function navigate(viewId) {
+      document.querySelectorAll('main > div > section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-100/60', 'dark:bg-slate-800', 'font-bold');
+      });
+      const activeNav = document.getElementById(`nav-${viewId}`);
+      if (activeNav) activeNav.classList.add('bg-amber-100/60', 'dark:bg-slate-800', 'font-bold');
+
+      const titles = {
+        'dashboard': 'Dashboard',
+        'produtos': 'Catálogo de Produtos & Tabela de Preços',
+        'ai-prices': 'IA de Inteligência de Preços (RJ)',
+        'pedidos': 'Pedidos & Vendas',
+        'clientes': 'Clientes CRM',
+        'fichas': 'Fichas Técnicas & Receitas',
+        'estoque': 'Insumos & Controle de Estoque',
+        'financeiro': 'Financeiro & Caixa'
+      };
+      document.getElementById('pageTitle').innerText = titles[viewId] || 'Bendito Caramelo';
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').className = isDark ? 'fas fa-sun text-lg' : 'fas fa-moon text-lg';
+    }
+
+    function switchRole() {
+      const roles = ['ADMIN MASTER', 'GESTOR', 'VENDEDOR', 'PRODUÇÃO'];
+      let nextIdx = (roles.indexOf(currentRole) + 1) % roles.length;
+      currentRole = roles[nextIdx];
+      document.getElementById('userRole').innerText = currentRole;
+    }
+
+    function renderDashboard() {
+      const totalVendas = db.pedidos
+        .filter(p => p.status === 'Pronto / Entregue')
+        .reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0);
+
+      const pedidosAtivos = db.pedidos.filter(p => p.status !== 'Pronto / Entregue').length;
+      const estoqueBaixo = db.estoque.filter(i => i.qty < i.min).length;
+
+      document.getElementById('dashVendasMes').innerText = `R$ ${totalVendas.toFixed(2)}`;
+      document.getElementById('dashPedidosAtivos').innerText = pedidosAtivos;
+      document.getElementById('dashEstoqueBaixo').innerText = estoqueBaixo;
+
+      document.getElementById('finSaldo').innerText = `R$ ${totalVendas.toFixed(2)}`;
+      document.getElementById('finEntradas').innerText = `R$ ${totalVendas.toFixed(2)}`;
+    }
+
+    function filterCategory(cat) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+        btn.className = "cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-800 dark:bg-slate-800 dark:text-slate-300";
+      });
+      const activeBtn = document.getElementById(`cat-${cat}`);
+      if (activeBtn) activeBtn.className = "cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-caramel-600 text-white";
+
+      renderProdutos();
+    }
+
+    function filterProductsBySearch(q) {
+      if (document.getElementById('view-produtos').classList.contains('hidden')) {
+        navigate('produtos');
+      }
+      renderProdutos(q.toLowerCase());
+    }
+
+    // RENDER PRODUTOS
+    function renderProdutos(searchQuery = '') {
+      const grid = document.getElementById('produtosGrid');
+      grid.innerHTML = '';
+
+      let list = db.produtos;
+
+      if (currentCategoryFilter !== 'ALL') {
+        list = list.filter(p => p.group === currentCategoryFilter);
+      }
+
+      if (searchQuery) {
+        list = list.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.yield && p.yield.toLowerCase().includes(searchQuery)));
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-amber-300 dark:border-slate-800">
+            <p class="text-sm font-semibold text-slate-500">Nenhum produto encontrado nesta categoria.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const groupBadges = {
+        'AVULSOS': 'Balas Avulsas / Cento',
+        'SACOS': 'Saco de Balas',
+        'CAIXAS': 'Caixa / Lata de Metal',
+        'POTINHO': 'Potinho Gourmet',
+        'KITS': 'Bolsa / Kit Presenteável'
+      };
+
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition-shadow";
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-start">
+              <span class="px-2.5 py-1 text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-full">
+                ${groupBadges[p.group] || 'Bendito Caramelo'}
+              </span>
+            </div>
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 leading-snug">${p.name}</h4>
+            <p class="text-xs text-slate-500 font-medium"><i class="fas fa-box-open mr-1"></i> ${p.yield || 'Embalagem Padrão'}</p>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Valor de Venda</p>
+              <p class="text-xl font-bold text-caramel-700 dark:text-amber-400">R$ ${parseFloat(p.price).toFixed(2)}</p>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button onclick="editProduto('${p.id}')" class="px-2.5 py-1.5 text-xs font-semibold bg-amber-100 dark:bg-slate-800 text-amber-800 dark:text-amber-300 rounded-lg hover:bg-amber-200 transition-colors">
+                <i class="fas fa-edit"></i> Editar
+              </button>
+              <button onclick="deleteProduto('${p.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 rounded-lg transition-colors">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function editProduto(id) {
+      const p = db.produtos.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modalProdutoTitle').innerText = 'Editar Item';
+      document.getElementById('editProdutoId').value = p.id;
+      document.getElementById('prodCategoryGroup').value = p.group || 'AVULSOS';
+      document.getElementById('prodNome').value = p.name;
+      document.getElementById('prodRendimento').value = p.yield || '';
+      document.getElementById('prodPreco').value = p.price;
+
+      openModal('modal-novo-produto');
+    }
+
+    function deleteProduto(id) {
+      if (confirm('Deseja excluir este item do catálogo?')) {
+        db.produtos = db.produtos.filter(p => p.id !== id);
+        saveDB();
+        renderProdutos();
+        populateDropdowns();
+      }
+    }
+
+    function saveProduto() {
+      const id = document.getElementById('editProdutoId').value;
+      const group = document.getElementById('prodCategoryGroup').value;
+      const name = document.getElementById('prodNome').value.trim();
+      const yieldVal = document.getElementById('prodRendimento').value.trim();
+      const price = parseFloat(document.getElementById('prodPreco').value) || 0;
+
+      if (!name || price <= 0) {
+        alert('Informe o Nome e o Valor de Venda do produto.');
+        return;
+      }
+
+      if (id) {
+        const p = db.produtos.find(item => item.id === id);
+        if (p) {
+          p.group = group;
+          p.name = name;
+          p.yield = yieldVal;
+          p.price = price;
+        }
+      } else {
+        db.produtos.push({
+          id: Date.now().toString(),
+          group,
+          name,
+          yield: yieldVal,
+          price
+        });
+      }
+
+      saveDB();
+      closeModal('modal-novo-produto');
+      renderProdutos();
+      populateDropdowns();
+
+      document.getElementById('modalProdutoTitle').innerText = 'Cadastrar Novo Doce / Kit';
+      document.getElementById('editProdutoId').value = '';
+      document.getElementById('prodNome').value = '';
+      document.getElementById('prodRendimento').value = '';
+      document.getElementById('prodPreco').value = '';
+    }
+
+    // RENDER CLIENTES
+    function renderClientes() {
+      const grid = document.getElementById('clientesGrid');
+      grid.innerHTML = '';
+
+      if (db.clientes.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-amber-300 dark:border-slate-800">
+            <p class="text-sm font-semibold text-slate-500">Nenhum cliente cadastrado ainda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      db.clientes.forEach(cli => {
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-sm space-y-3 relative";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-caramel-100 dark:bg-slate-800 text-caramel-800 dark:text-amber-400 font-bold flex items-center justify-center text-sm">
+                ${cli.nome.charAt(0)}
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${cli.nome}</h4>
+                <p class="text-xs text-slate-400">${cli.end || 'Rio de Janeiro'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-xs space-y-1 text-slate-600 dark:text-slate-400 border-t border-b border-slate-100 dark:border-slate-800 py-2">
+            <p><i class="fab fa-whatsapp text-emerald-500 mr-1.5"></i> ${cli.whats || 'Não informado'}</p>
+            <p><i class="fab fa-instagram text-pink-500 mr-1.5"></i> ${cli.insta || '@'}</p>
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <a href="https://wa.me/55${(cli.whats || '').replace(/\D/g, '')}" target="_blank" class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+              <i class="fab fa-whatsapp"></i> Mensagem
+            </a>
+            <div class="flex items-center gap-1">
+              <button onclick="editCliente('${cli.id}')" class="px-2.5 py-1 text-[11px] font-semibold bg-amber-100 dark:bg-slate-800 text-amber-800 dark:text-amber-300 rounded-lg">Editar</button>
+              <button onclick="deleteCliente('${cli.id}')" class="px-2.5 py-1 text-[11px] font-semibold bg-rose-100 text-rose-700 rounded-lg"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function editCliente(id) {
+      const cli = db.clientes.find(c => c.id === id);
+      if (!cli) return;
+
+      document.getElementById('modalClienteTitle').innerText = 'Editar Cliente';
+      document.getElementById('editClienteId').value = cli.id;
+      document.getElementById('cliNome').value = cli.nome;
+      document.getElementById('cliWhats').value = cli.whats;
+      document.getElementById('cliInsta').value = cli.insta;
+      document.getElementById('cliEnd').value = cli.end;
+      document.getElementById('cliObs').value = cli.obs;
+
+      openModal('modal-novo-cliente');
+    }
+
+    function deleteCliente(id) {
+      if (confirm('Excluir este cliente?')) {
+        db.clientes = db.clientes.filter(c => c.id !== id);
+        saveDB();
+        renderClientes();
+        populateDropdowns();
+      }
+    }
+
+    function saveCliente() {
+      const id = document.getElementById('editClienteId').value;
+      const nome = document.getElementById('cliNome').value.trim();
+      const whats = document.getElementById('cliWhats').value.trim();
+      const insta = document.getElementById('cliInsta').value.trim();
+      const end = document.getElementById('cliEnd').value.trim();
+      const obs = document.getElementById('cliObs').value.trim();
+
+      if (!nome || !whats) {
+        alert('Informe Nome e WhatsApp.');
+        return;
+      }
+
+      if (id) {
+        const cli = db.clientes.find(c => c.id === id);
+        if (cli) {
+          cli.nome = nome; cli.whats = whats; cli.insta = insta; cli.end = end; cli.obs = obs;
+        }
+      } else {
+        db.clientes.push({ id: Date.now().toString(), nome, whats, insta, end, obs });
+      }
+
+      saveDB();
+      closeModal('modal-novo-cliente');
+      renderClientes();
+      populateDropdowns();
+    }
+
+    // RENDER PEDIDOS
+    function renderPedidos() {
+      const colPendente = document.getElementById('colPendente');
+      const colProducao = document.getElementById('colProducao');
+      const colEntregue = document.getElementById('colEntregue');
+
+      colPendente.innerHTML = '';
+      colProducao.innerHTML = '';
+      colEntregue.innerHTML = '';
+
+      let cPend = 0, cProd = 0, cEnt = 0;
+
+      if (db.pedidos.length === 0) {
+        colPendente.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Sem pedidos pendentes</p>`;
+        colProducao.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Sem pedidos em produção</p>`;
+        colEntregue.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Sem pedidos entregues</p>`;
+        document.getElementById('countPendente').innerText = '0';
+        document.getElementById('countProducao').innerText = '0';
+        document.getElementById('countEntregue').innerText = '0';
+        return;
+      }
+
+      db.pedidos.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-amber-50/50 dark:bg-slate-800/80 p-3.5 rounded-xl border border-amber-200/50 dark:border-slate-700/50 space-y-2 text-xs";
+        card.innerHTML = `
+          <div class="flex justify-between items-start font-bold">
+            <span class="text-slate-800 dark:text-slate-100">#${p.id.slice(-4)} - ${p.cliente}</span>
+            <span class="text-caramel-700 dark:text-amber-400">R$ ${parseFloat(p.valor).toFixed(2)}</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 font-medium">${p.qtd}x ${p.produto}</p>
+          <div class="flex justify-between items-center text-[11px] text-slate-400 pt-1">
+            <span>📅 Entrega: ${p.data || 'A definir'}</span>
+            <button onclick="advanceStatus('${p.id}')" class="text-amber-600 font-bold hover:underline">
+              Avançar <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        `;
+
+        if (p.status === 'Pendente') { colPendente.appendChild(card); cPend++; }
+        else if (p.status === 'Em Produção') { colProducao.appendChild(card); cProd++; }
+        else { colEntregue.appendChild(card); cEnt++; }
+      });
+
+      document.getElementById('countPendente').innerText = cPend;
+      document.getElementById('countProducao').innerText = cProd;
+      document.getElementById('countEntregue').innerText = cEnt;
+    }
+
+    function advanceStatus(id) {
+      const p = db.pedidos.find(item => item.id === id);
+      if (!p) return;
+
+      if (p.status === 'Pendente') p.status = 'Em Produção';
+      else if (p.status === 'Em Produção') p.status = 'Pronto / Entregue';
+
+      saveDB();
+      renderPedidos();
+      renderDashboard();
+    }
+
+    function savePedido() {
+      const cliente = document.getElementById('pedCliente').value;
+      const produto = document.getElementById('pedProduto').value;
+      const qtd = document.getElementById('pedQtd').value;
+      const valor = document.getElementById('pedValor').value;
+      const data = document.getElementById('pedData').value;
+
+      if (!cliente || !produto || !valor) {
+        alert('Preencha os campos obrigatórios.');
+        return;
+      }
+
+      db.pedidos.push({
+        id: Date.now().toString(),
+        cliente, produto, qtd, valor, data,
+        status: 'Pendente'
+      });
+
+      saveDB();
+      closeModal('modal-novo-pedido');
+      renderPedidos();
+      renderDashboard();
+    }
+
+    // AI PRICES TABLE
+    function renderAIPrices() {
+      const tbody = document.getElementById('aiPricesTable');
+      tbody.innerHTML = '';
+
+      const items = db.aiPrices[currentAiTab] || [];
+      items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-amber-50/30 dark:hover:bg-slate-800/30 transition-colors";
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-caramel-700 dark:text-amber-400">${item.rank}</td>
+          <td class="p-3 font-semibold text-slate-800 dark:text-slate-200">${item.store}</td>
+          <td class="p-3 font-bold text-emerald-600 dark:text-emerald-400">R$ ${item.price.toFixed(2)}</td>
+          <td class="p-3 text-slate-500">R$ ${item.priceKg.toFixed(2)}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">${item.status}</span></td>
+          <td class="p-3">
+            <a href="${item.link}" target="_blank" class="px-2.5 py-1 text-[11px] font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-lg inline-flex items-center gap-1 transition-all">
+              <i class="fas fa-external-link-alt"></i> Ver Oferta
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function switchAITab(tab) {
+      currentAiTab = tab;
+      document.getElementById('ai-tab-moca').className = tab === 'moca' ? "px-4 py-2 text-xs font-bold border-b-2 border-caramel-600 text-caramel-700 dark:text-amber-400" : "px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500";
+      document.getElementById('ai-tab-uniao').className = tab === 'uniao' ? "px-4 py-2 text-xs font-bold border-b-2 border-caramel-600 text-caramel-700 dark:text-amber-400" : "px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500";
+      renderAIPrices();
+    }
+
+    function refreshAIPrices() {
+      const icon = document.getElementById('refreshIcon');
+      icon.classList.add('fa-spin');
+      setTimeout(() => {
+        icon.classList.remove('fa-spin');
+        alert('Preços de insumos no Rio de Janeiro atualizados!');
+      }, 800);
+    }
+
+    // ESTOQUE
+    function renderEstoque() {
+      const tbody = document.getElementById('estoqueTable');
+      tbody.innerHTML = '';
+
+      db.estoque.forEach(i => {
+        const alertClass = i.qty < i.min ? 'text-rose-600 font-bold bg-rose-50 dark:bg-rose-950/40' : '';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-amber-50/30 dark:hover:bg-slate-800/30 transition-colors";
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-slate-800 dark:text-slate-200">${i.name}</td>
+          <td class="p-3 ${alertClass}">${i.qty} unidades ${i.qty < i.min ? '⚠️' : ''}</td>
+          <td class="p-3 text-slate-400">${i.min} unidades</td>
+          <td class="p-3 text-emerald-600 font-medium">${i.lastPrice}</td>
+          <td class="p-3">
+            <button onclick="navigate('ai-prices')" class="text-xs font-bold text-amber-600 hover:underline">
+              Cotar Preço RJ
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateDropdowns() {
+      const pedCli = document.getElementById('pedCliente');
+      const pedProd = document.getElementById('pedProduto');
+
+      if (pedCli) {
+        pedCli.innerHTML = db.clientes.length === 0
+          ? '<option value="">Nenhum cliente cadastrado</option>'
+          : db.clientes.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+      }
+
+      if (pedProd) {
+        pedProd.innerHTML = db.produtos.map(p => `<option value="${p.name}">${p.name} - R$ ${parseFloat(p.price).toFixed(2)}</option>`).join('');
+      }
+    }
+
+    function resetDataPrompt() {
+      if (confirm('Deseja zerar todos os clientes e pedidos para começar do zero?')) {
+        db.clientes = [];
+        db.pedidos = [];
+        saveDB();
+
+        renderClientes();
+        renderPedidos();
+        renderDashboard();
+        populateDropdowns();
+
+        alert('Sistema zerado e pronto para uso!');
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function initCharts() {
+      const ctxFat = document.getElementById('chartFaturamento')?.getContext('2d');
+      if (ctxFat) {
+        new Chart(ctxFat, {
+          type: 'line',
+          data: {
+            labels: ['Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out'],
+            datasets: [{
+              label: 'Faturamento (R$)',
+              data: [3200, 4100, 3800, 5200, 4800, 6100],
+              borderColor: '#d97706',
+              backgroundColor: 'rgba(217, 119, 6, 0.1)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+
+      const ctxPrecos = document.getElementById('chartPrecosInsumos')?.getContext('2d');
+      if (ctxPrecos) {
+        new Chart(ctxPrecos, {
+          type: 'bar',
+          data: {
+            labels: ['Atacadão', 'Guanabara', 'Zona Sul'],
+            datasets: [{
+              label: 'Preço Leite Moça 395g (R$)',
+              data: [6.97, 8.68, 8.98],
+              backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
